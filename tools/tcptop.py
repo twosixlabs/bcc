@@ -33,6 +33,7 @@ from struct import pack
 from time import sleep, strftime
 from subprocess import call
 import ctypes as ct
+from collections import namedtuple, defaultdict
 
 
 
@@ -337,3 +338,4 @@ if __name__ == "__main__":
     import argparse, sys
     client_main(sys.argv)
     sys.exit(0)
+
