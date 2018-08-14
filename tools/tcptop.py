@@ -331,7 +331,7 @@ def client_main(args):
 
     args = parser.parse_args()
     debug = 0
-    probe = TCPTop(args)
+    sensor = TCPTop(args)
 
 
 if __name__ == "__main__":
