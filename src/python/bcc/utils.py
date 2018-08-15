@@ -45,7 +45,7 @@ def detect_language(candidates, pid):
 
 FILESYSTEMENCODING = sys.getfilesystemencoding()
 
-def printb(s, file=sys.stdout, nl=0):
+def printb(s, file=sys.stdout, nl=1):
     """
     printb(s)
 
@@ -54,7 +54,7 @@ def printb(s, file=sys.stdout, nl=0):
     buf = file.buffer if hasattr(file, "buffer") else file
 
     buf.write(s)
-    if not nl:
+    if nl:
         buf.write(b"\n")
     file.flush()
 

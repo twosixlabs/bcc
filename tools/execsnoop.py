@@ -213,7 +213,7 @@ class ExecSnoop:
                         argv_text = b' '.join(argv[event.pid]).rstrip(b'\n')
                         printb(b'"command": %s, "pid": %d, "ppid": %s, "retval": %d, "argv": %s' % (event.comm, event.pid,
                                                         ppid, event.retval, argv_text),
-                           nl=args.json)
+                               nl = not args.json)
                     else:
                         argv_text = b' '.join(argv[event.pid]).replace(b'\n', b'\\n')
                         printb(b"%-16s %-6d %-6s %3d %s" % (event.comm, event.pid,
