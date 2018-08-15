@@ -275,10 +275,12 @@ class MountSnoop:
         return 0;
     }
     """
+    arguments = {}
 
     def __init__(self, args, debug=0):
         mounts = {}
         umounts = {}
+        self.arguments = args
         if args.ebpf:
             print(self.bpf_text)
             exit()
@@ -291,8 +293,9 @@ class MountSnoop:
         b.attach_kretprobe(event=umount_fnname, fn_name="do_ret_sys_umount")
         b['events'].open_perf_buffer(
             functools.partial(self.print_event, mounts, umounts))
-        print('{:16} {:<7} {:<7} {:<11} {}'.format(
-            'COMM', 'PID', 'TID', 'MNT_NS', 'CALL'))
+        if not args.json:
+            print('{:16} {:<7} {:<7} {:<11} {}'.format(
+                'COMM', 'PID', 'TID', 'MNT_NS', 'CALL'))
         while True:
             b.perf_buffer_poll()
 
@@ -398,9 +401,15 @@ class MountSnoop:
                         target=self.decode_mount_string(syscall['target']),
                         flags=self.decode_umount_flags(syscall['flags']),
                         retval=self.decode_errno(event.union.retval))
-                print('{:16} {:<7} {:<7} {:<11} {}'.format(
-                    syscall['comm'].decode(), syscall['tgid'], syscall['pid'],
-                    syscall['mnt_ns'], call))
+
+                if self.arguments.json:
+                    print('{{"comm": {}, "tid": {}, "pid": {}, "ns": {}, "call": {}}}'.format(
+                        syscall['comm'].decode(), syscall['tgid'], syscall['pid'],
+                        syscall['mnt_ns'], call))
+                else:
+                    print('{:16} {:<7} {:<7} {:<11} {}'.format(
+                        syscall['comm'].decode(), syscall['tgid'], syscall['pid'],
+                        syscall['mnt_ns'], call))
         except KeyError:
             # This might happen if we lost an event.
             pass
@@ -411,7 +420,9 @@ def client_main(args):
         description='trace mount() and umount() syscalls'
     )
     parser.add_argument("--ebpf", action="store_true",
-        help=argparse.SUPPRESS)
+                        help=argparse.SUPPRESS)
+    parser.add_argument("-j", "--json", action="store_true",
+                        help="output json objects")
     args = parser.parse_args()
     sensor = MountSnoop(args)
 
