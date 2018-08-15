@@ -217,8 +217,7 @@ class ExecSnoop:
                     else:
                         argv_text = b' '.join(argv[event.pid]).replace(b'\n', b'\\n')
                         printb(b"%-16s %-6d %-6s %3d %s" % (event.comm, event.pid,
-                                                        ppid, event.retval, argv_text),
-                           nl=args.json)
+                                                        ppid, event.retval, argv_text))
                     if args.json:
                         print("}")
                 try:
