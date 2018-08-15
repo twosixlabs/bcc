@@ -297,7 +297,7 @@ class MountSnoop:
             b.perf_buffer_poll()
 
 
-    def _decode_flags(flags, flag_list):
+    def _decode_flags(self, flags, flag_list):
         str_flags = []
         for flag, bit in flag_list:
             if flags & bit:
@@ -308,32 +308,32 @@ class MountSnoop:
         return str_flags
 
 
-    def decode_flags(flags, flag_list):
-        return '|'.join(_decode_flags(flags, flag_list))
+    def decode_flags(self, flags, flag_list):
+        return '|'.join(self._decode_flags(flags, flag_list))
 
 
-    def decode_mount_flags(flags):
+    def decode_mount_flags(self, flags):
         str_flags = []
-        if flags & MS_MGC_MSK == MS_MGC_VAL:
-            flags &= ~MS_MGC_MSK
+        if flags & self.MS_MGC_MSK == self.MS_MGC_VAL:
+            flags &= ~self.MS_MGC_MSK
             str_flags.append('MS_MGC_VAL')
-        str_flags.extend(_decode_flags(flags, MOUNT_FLAGS))
+        str_flags.extend(self._decode_flags(flags, self.MOUNT_FLAGS))
         return '|'.join(str_flags)
 
 
-    def decode_umount_flags(flags):
-        return decode_flags(flags, UMOUNT_FLAGS)
+    def decode_umount_flags(self, flags):
+        return self.decode_flags(flags, self.UMOUNT_FLAGS)
 
 
-    def decode_errno(retval):
+    def decode_errno(self, retval):
         try:
             return '-' + errno.errorcode[-retval]
         except KeyError:
             return str(retval)
 
-    def escape_character(c):
+    def escape_character(self, c):
         try:
-            return _escape_chars[c]
+            return self._escape_chars[c]
         except KeyError:
             if 0x20 <= c <= 0x7e:
                 return chr(c)
@@ -342,14 +342,14 @@ class MountSnoop:
 
 
     if sys.version_info.major < 3:
-        def decode_mount_string(s):
-            return '"{}"'.format(''.join(escape_character(ord(c)) for c in s))
+        def decode_mount_string(self, s):
+            return '"{}"'.format(''.join(self.escape_character(ord(c)) for c in s))
     else:
-        def decode_mount_string(s):
-            return '"{}"'.format(''.join(escape_character(c) for c in s))
+        def decode_mount_string(self, s):
+            return '"{}"'.format(''.join(self.escape_character(c) for c in s))
 
 
-    def print_event(mounts, umounts, cpu, data, size):
+    def print_event(self, mounts, umounts, cpu, data, size):
         event = ctypes.cast(data, ctypes.POINTER(Event)).contents
 
         try:
@@ -386,18 +386,18 @@ class MountSnoop:
                     syscall = mounts.pop(event.pid)
                     call = ('mount({source}, {target}, {type}, {flags}, {data}) ' +
                             '= {retval}').format(
-                        source=decode_mount_string(syscall['source']),
-                        target=decode_mount_string(syscall['target']),
-                        type=decode_mount_string(syscall['type']),
-                        flags=decode_mount_flags(syscall['flags']),
-                        data=decode_mount_string(syscall['data']),
-                        retval=decode_errno(event.union.retval))
+                        source=self.decode_mount_string(syscall['source']),
+                        target=self.decode_mount_string(syscall['target']),
+                        type=self.decode_mount_string(syscall['type']),
+                        flags=self.decode_mount_flags(syscall['flags']),
+                        data=self.decode_mount_string(syscall['data']),
+                        retval=self.decode_errno(event.union.retval))
                 else:
                     syscall = umounts.pop(event.pid)
                     call = 'umount({target}, {flags}) = {retval}'.format(
-                        target=decode_mount_string(syscall['target']),
-                        flags=decode_umount_flags(syscall['flags']),
-                        retval=decode_errno(event.union.retval))
+                        target=self.decode_mount_string(syscall['target']),
+                        flags=self.decode_umount_flags(syscall['flags']),
+                        retval=self.decode_errno(event.union.retval))
                 print('{:16} {:<7} {:<7} {:<11} {}'.format(
                     syscall['comm'].decode(), syscall['tgid'], syscall['pid'],
                     syscall['mnt_ns'], call))

@@ -11,7 +11,7 @@
 #
 # 20-Sep-2015   Brendan Gregg   Created this.
 # 19-Feb-2016   Allan McAleavy migrated to BPF_PERF_OUTPUT
-# 15-Aug-2018   Michael D. Day II converted to class
+# 15-Aug-2018   Michael D. Day II converted to class, add json output
 
 from __future__ import print_function
 from bcc import BPF
