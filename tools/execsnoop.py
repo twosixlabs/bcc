@@ -239,6 +239,7 @@ def client_main(args):
         ./execsnoop -q        # add "quotemarks" around arguments
         ./execsnoop -n main   # only print command lines containing "main"
         ./execsnoop -l tpkg   # only print command where arguments contains "tpkg"
+        ./execsnoop -j        # print output as JSON objects
     """
     parser = argparse.ArgumentParser(
         description="Trace exec() syscalls",
